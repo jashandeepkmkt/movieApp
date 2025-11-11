@@ -145,36 +145,18 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 50,
-  },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  container: { flex: 1, backgroundColor: '#121212', paddingTop: 40 },
+  heading: { color: '#fff', fontSize: 28, fontWeight: 'bold', paddingLeft: 20, marginBottom: 10 },
+  section: { color: '#fff', fontSize: 22, fontWeight: 'bold', paddingLeft: 20, marginTop: 20, marginBottom: 10 },
+  searchInput: {
+    backgroundColor: '#1c1c1c',
+    color: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    height: 40,
+    marginHorizontal: 20,
     marginBottom: 10,
   },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    margin: 10,
-  },
-  picker: {
-    marginHorizontal: 10,
-  },
-  section: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginVertical: 10,
-    marginLeft: 10,
-  },
+  picker: { color: '#fff', marginHorizontal: 20, marginBottom: 10, backgroundColor: '#1c1c1c' },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#121212' },
 });
