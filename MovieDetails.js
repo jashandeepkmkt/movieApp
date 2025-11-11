@@ -1,11 +1,14 @@
- /*
- I Jashandeep Kaur , 000900507 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else.
+/*
+ I Jashandeep Kaur , 000900507 certify that this material is my original work. 
+ No other person's work has been used without due acknowledgement. 
+ I have not made my work available to anyone else.
 */
 
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, ScrollView, TextInput, Picker } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, ScrollView, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-export default function MovieDetails({ movie, onClose, onBook }) {
+export default function MovieDetails({ movie, onBack, onBook }) {
   const [bookingVisible, setBookingVisible] = useState(false);
   const [bookingInfoVisible, setBookingInfoVisible] = useState(false);
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -36,10 +39,17 @@ export default function MovieDetails({ movie, onClose, onBook }) {
     if (onBook) onBook(movie, selectedSeats, selectedDate, selectedTime, selectedLocation);
   };
 
+  const handleBack = () => {
+    // Close all modals before going back
+    setBookingVisible(false);
+    setBookingInfoVisible(false);
+    onBack(); // ✅ Fixed: changed from onClose() to onBack()
+  };
+
   return (
     <Modal visible animationType="slide">
       <ScrollView style={styles.container}>
-        <TouchableOpacity onPress={onClose} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
 
@@ -128,10 +138,7 @@ export default function MovieDetails({ movie, onClose, onBook }) {
               Time: {selectedTime}{"\n"}
               Seats: {selectedSeats.join(', ')}
             </Text>
-            <TouchableOpacity
-              onPress={() => setBookingInfoVisible(false)}
-              style={styles.button}
-            >
+            <TouchableOpacity onPress={() => setBookingInfoVisible(false)} style={styles.button}>
               <Text style={styles.buttonText}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -160,5 +167,5 @@ const styles = StyleSheet.create({
   bookedSeat: { backgroundColor: '#ff3333' },
   infoText: { color: '#fff', marginVertical: 10, textAlign: 'center' },
   dateInput: { backgroundColor: '#1c1c1c', color: '#fff', borderRadius: 8, paddingHorizontal: 10, height: 40, width: 200, textAlign: 'center', marginBottom: 10 },
-  picker: { height: 50, width: 200, color: '#fff', backgroundColor: '#1c1c1c', marginBottom: 10 }
+  picker: { height: 50, width: 200, color: '#fff', backgroundColor: '#1c1c1c', marginBottom: 10 },
 });
