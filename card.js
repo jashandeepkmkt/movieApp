@@ -1,45 +1,41 @@
-import React from "react";  
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import React from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default function Card({ movie, onPress }) {
-    return (
-        <TouchableOpacity onPress={onPress} style={styles.card}>
-            <Image 
-                source={{ uri: `https:image.org\t\p\w300${movie.poster_path}` }}
-                 style={styles.image} 
-            />
-
-            <Text style={styles.title} numberOfLines={3}>{movie.title}</Text>
-            <Text style={styles.rating}>Rating: {movie.vote_average}</Text>
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <Image
+        style={styles.image}
+        source={{ uri: `https://image.tmdb.org/t/p/w300${movie.poster_path}` }}
+      />
+      <Text style={styles.title}>{movie.title}</Text>
+      <Text style={styles.rating}>⭐ {movie.vote_average}</Text>
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({
-    card: {
-        width: 150,
-        margin: 10,
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: '#1c1c1c',
-        borderRadius: 8,
-    },
-    image: {
-        width: '100%',
-        height: 200,
-        borderRadius: 10,
-    },
-    title: {
-        marginTop: 5,
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontSize: 16,
-    },
-    rating: {
-        marginTop: 3,
-        color: '#ffd700',
-        fontSize: 14,       
-    },
-
+  card: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 10,
+    marginBottom: 15,
+    width: 200,
+    alignItems: 'center',
+    padding: 10,
+  },
+  image: {
+    width: 180,
+    height: 270,
+    borderRadius: 8,
+  },
+  title: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  rating: {
+    color: '#bbb',
+    marginTop: 4,
+  },
 });
