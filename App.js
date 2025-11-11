@@ -1,3 +1,7 @@
+ /*
+ I Jashandeep Kaur , 000900507 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else.
+*/
+
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';

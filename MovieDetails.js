@@ -1,3 +1,7 @@
+ /*
+ I Jashandeep Kaur , 000900507 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else.
+*/
+
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, ScrollView, TextInput, Picker } from 'react-native';
 
