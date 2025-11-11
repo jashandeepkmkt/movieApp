@@ -131,14 +131,16 @@ export default function App() {
 
       <Text style={styles.section}>🆕 Newly Launched</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {filteredMovies.filter(movie => {
-          const release = new Date(movie.release_date);
-          const today = new Date();
-          const diff = (today - release) / (1000 * 3600 * 24);
-          return diff <= 30;
-        }).map(movie => (
-          <Card key={movie.id} movie={movie} onPress={() => setSelectedMovie(movie)} />
-        ))}
+        {filteredMovies
+          .filter(movie => {
+            const release = new Date(movie.release_date);
+            const today = new Date();
+            const diff = (today - release) / (1000 * 3600 * 24);
+            return diff <= 30;
+          })
+          .map(movie => (
+            <Card key={movie.id} movie={movie} onPress={() => setSelectedMovie(movie)} />
+          ))}
       </ScrollView>
     </View>
   );
@@ -146,7 +148,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212', paddingTop: 40 },
-  heading: { color: '#fff', fontSize: 28, fontWeight: 'bold', paddingLeft: 20, marginBottom: 10 },
+  header: { color: '#fff', fontSize: 28, fontWeight: 'bold', paddingLeft: 20, marginBottom: 10 },
   section: { color: '#fff', fontSize: 22, fontWeight: 'bold', paddingLeft: 20, marginTop: 20, marginBottom: 10 },
   searchInput: {
     backgroundColor: '#1c1c1c',
