@@ -1,25 +1,29 @@
- /*
- I Jashandeep Kaur , 000900507 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else.
-*/
-
+/*
+  I Jashandeep Kaur , 000900507 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else.
+  */
+ 
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, ActivityIndicator, TextInput, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import React from 'react';
-import MovieDetails from './MovieDetails';
-import Card from './card';
 import axios from 'axios';
+import Card from './card';
+import MovieDetails from './MovieDetails';
 
 const API_KEY = '38bbfacfe933b107211efd7e442ca6f1';
 
 export default function App() {
-  const [movies, setMovies] = React.useState([]);
-  const [selectedMovie, setSelectedMovie] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [search, setSearch] = React.useState('');
-  const [genre, setGenre] = React.useState('');
-  const [bookings, setBookings] = React.useState([]);
-  const [viewBookings, setViewBookings] = React.useState(false);
+  const [trending, setTrending] = useState([]);
+  const [topRated, setTopRated] = useState([]);
+  const [popular, setPopular] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+  const [nowPlaying, setNowPlaying] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [search, setSearch] = useState('');
+  const [genre, setGenre] = useState('');
+  const [bookings, setBookings] = useState([]);
+  const [showBookings, setShowBookings] = useState(false);
 
   const genres = [
     { label: 'All', value: '' },
@@ -30,27 +34,56 @@ export default function App() {
     { label: 'Romance', value: '10749' },
   ];
 
-  React.useEffect(() => {
-    fetchMovies();
+  useEffect(() => {
+    fetchAllMovies();
   }, [genre]);
 
-  const fetchMovies = async () => {
-    setLoading(true);
+  const fetchMoviesByCategory = async (category, genre = '') => {
+    let url = '';
+    switch(category) {
+      case 'trending':
+        url = `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`;
+        break;
+      case 'top_rated':
+        url = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&page=1`;
+        break;
+      case 'popular':
+        url = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=1`;
+        break;
+      case 'upcoming':
+        url = `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&page=1`;
+        break;
+      case 'now_playing':
+        url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&page=1`;
+        break;
+      default:
+        return [];
+    }
+    if (genre) url += `&with_genres=${genre}`;
     try {
-      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&page=1`;
-      if (genre) url += `&with_genres=${genre}`;
       const response = await axios.get(url);
-      setMovies(response.data.results);
+      return response.data.results;
     } catch (error) {
       console.error('Error fetching movies: ', error);
-    } finally {
-      setLoading(false);
+      return [];
     }
   };
 
-  const handleBook = (movie, seats, date, time, location) => {
-    const newBooking = { movie, seats, date, time, location };
-    setBookings([...bookings, newBooking]);
+  const fetchAllMovies = async () => {
+    setLoading(true);
+    const [trend, top, pop, upc, now] = await Promise.all([
+      fetchMoviesByCategory('trending', genre),
+      fetchMoviesByCategory('top_rated', genre),
+      fetchMoviesByCategory('popular', genre),
+      fetchMoviesByCategory('upcoming', genre),
+      fetchMoviesByCategory('now_playing', genre),
+    ]);
+    setTrending(trend);
+    setTopRated(top);
+    setPopular(pop);
+    setUpcoming(upc);
+    setNowPlaying(now);
+    setLoading(false);
   };
 
   if (loading) {
@@ -61,55 +94,71 @@ export default function App() {
     );
   }
 
-  if (selectedMovie) {
-    return (
-      <MovieDetails
-        movie={selectedMovie}
-        onClose={() => setSelectedMovie(null)}
-        onBook={handleBook}
-      />
-    );
-  }
+  const filterMovies = (list) =>
+    list.filter(movie => movie.title.toLowerCase().includes(search.toLowerCase()));
 
-  if (viewBookings) {
-    return (
-      <ScrollView style={styles.container}>
-        <TouchableOpacity onPress={() => setViewBookings(false)} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.header}>My Bookings</Text>
-        {bookings.length === 0 ? (
-          <Text style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}>No bookings yet.</Text>
-        ) : (
-          bookings.map((b, index) => (
-            <View key={index} style={styles.bookingCard}>
-              <Text style={styles.bookingTitle}>{b.movie.title}</Text>
-              <Text style={styles.bookingText}> Date: {b.date}</Text>
-              <Text style={styles.bookingText}> Time: {b.time}</Text>
-              <Text style={styles.bookingText}> Location: {b.location}</Text>
-              <Text style={styles.bookingText}> Seats: {b.seats.join(', ')}</Text>
-            </View>
-          ))
-        )}
+  const Section = ({ title, data }) => (
+    <View style={{ marginBottom: 20 }}>
+      <Text style={styles.section}>{title}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {filterMovies(data).map(movie => (
+          <Card
+            key={movie.id}
+            movie={movie}
+            onPress={() => setSelectedMovie(movie)}
+          />
+        ))}
       </ScrollView>
-    );
-  }
+    </View>
+  );
 
-  const filteredMovies = movies.filter(movie =>
-    movie.title.toLowerCase().includes(search.toLowerCase())
+  const handleBooking = (movie, seats) => {
+    setBookings([...bookings, { movie, seats }]);
+  };
+
+  const BookingModal = () => (
+    <Modal visible={showBookings} animationType="slide">
+      <View style={styles.bookingContainer}>
+        <Text style={styles.section}>My Bookings</Text>
+        {bookings.length === 0 ? (
+          <Text style={{ color: '#fff', fontSize: 18 }}>No bookings yet.</Text>
+        ) : (
+          <FlatList
+            data={bookings}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.bookingItem}>
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+                  {item.movie.title}
+                </Text>
+                <Text style={{ color: '#fff' }}>Seats: {item.seats.join(', ')}</Text>
+              </View>
+            )}
+          />
+        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setShowBookings(false)}
+        >
+          <Text style={styles.buttonText}>Close</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
   );
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>🎬 Movie App</Text>
 
-      <TextInput
-        placeholder="Search Movies"
-        placeholderTextColor="#888"
-        style={styles.searchInput}
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder="Search Movies"
+          placeholderTextColor="#aaa"
+          style={styles.searchInput}
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
 
       <Picker
         selectedValue={genre}
@@ -121,41 +170,74 @@ export default function App() {
         ))}
       </Picker>
 
-      <TouchableOpacity onPress={() => setViewBookings(true)} style={styles.button}>
+      <TouchableOpacity
+        style={[styles.button, { marginHorizontal: 20 }]}
+        onPress={() => setShowBookings(true)}
+      >
         <Text style={styles.buttonText}>View My Bookings</Text>
       </TouchableOpacity>
 
-      <StatusBar style="auto" />
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {filteredMovies.map(movie => (
-          <Card key={movie.id} movie={movie} onPress={() => setSelectedMovie(movie)} />
-        ))}
+      <ScrollView>
+        <Section title="Trending" data={trending} />
+        <Section title="Top Rated" data={topRated} />
+        <Section title="Popular" data={popular} />
+        <Section title="Upcoming" data={upcoming} />
+        <Section title="Now Playing" data={nowPlaying} />
       </ScrollView>
+
+      <StatusBar style="auto" />
+      {showBookings && <BookingModal />}
+      {selectedMovie && (
+        <MovieDetails
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          onBook={handleBooking} // pass booking function
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212', paddingTop: 40 },
+  container: { flex: 1, backgroundColor: '#121212', paddingTop: 50 },
   header: { color: '#fff', fontSize: 28, fontWeight: 'bold', paddingLeft: 20, marginBottom: 10 },
+  section: { color: '#fff', fontSize: 22, fontWeight: 'bold', paddingLeft: 20, marginVertical: 10 },
+  searchContainer: { marginHorizontal: 20, marginBottom: 10 },
   searchInput: {
     backgroundColor: '#1c1c1c',
     color: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    height: 45,
-    marginHorizontal: 20,
-    marginBottom: 10,
-    fontSize: 16,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    height: 50,
+    fontSize: 18,
   },
-  picker: { color: '#fff', marginHorizontal: 20, marginBottom: 10, backgroundColor: '#1c1c1c', height: 50 },
-  button: { backgroundColor: '#00bfff', padding: 12, borderRadius: 8, alignItems: 'center', marginHorizontal: 20, marginVertical: 10 },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
+  picker: {
+    color: '#fff',
+    marginHorizontal: 20,
+    marginBottom: 15,
+    backgroundColor: '#1c1c1c',
+    fontSize: 18,
+  },
+  button: {
+    backgroundColor: '#00bfff',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#121212' },
-  backButton: { backgroundColor: '#00bfff', padding: 10, borderRadius: 8, alignItems: 'center', margin: 20 },
-  backButtonText: { color: '#fff', fontSize: 16 },
-  bookingCard: { backgroundColor: '#1E1E1E', marginHorizontal: 20, marginVertical: 10, padding: 15, borderRadius: 10 },
-  bookingTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
-  bookingText: { color: '#ccc', fontSize: 14, marginBottom: 3 },
+  bookingContainer: {
+    flex: 1,
+    backgroundColor: '#121212',
+    padding: 20,
+    alignItems: 'center',
+  },
+  bookingItem: {
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: '#1c1c1c',
+    borderRadius: 8,
+    width: '100%',
+  },
 });
